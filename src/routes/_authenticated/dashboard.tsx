@@ -21,8 +21,8 @@ const chartData = [{ day: "Mon", kcal: 1810 }, { day: "Tue", kcal: 2050 }, { day
 function Dashboard() {
   const { user } = Route.useRouteContext(); const navigate = useNavigate();
   const [initial, setInitial] = useState<UIMessage[]>([]); const [ready, setReady] = useState(false); const inputRef = useRef<HTMLTextAreaElement>(null);
-  useEffect(() => { loadChat().then(setInitial).catch(() => setInitial([])).finally(() => setReady(true)); }, []);
-  const tokenTransport = useMemo(() => new DefaultChatTransport({ api: "/api/chat", headers: async () => { const { data } = await supabase.auth.getSession(); return data.session?.access_token ? { Authorization: `Bearer ${data.session.access_token}` } : {}; } }), []);
+  useEffect(() => { loadChat().then((saved) => setInitial(saved as UIMessage[])).catch(() => setInitial([])).finally(() => setReady(true)); }, []);
+  const tokenTransport = useMemo(() => new DefaultChatTransport({ api: "/api/chat", prepareSendMessagesRequest: async ({ messages }) => { const { data } = await supabase.auth.getSession(); return { body: { messages }, headers: data.session?.access_token ? { Authorization: `Bearer ${data.session.access_token}` } : {} }; } }), []);
   if (!ready) return <div className="flex min-h-screen items-center justify-center"><Shimmer>Preparing your nutrition desk…</Shimmer></div>;
   return <DashboardContent key="single-chat" initial={initial} transport={tokenTransport} userEmail={user.email ?? ""} onSignOut={async () => { await supabase.auth.signOut(); navigate({ to: "/auth", replace: true }); }} inputRef={inputRef} />;
 }
