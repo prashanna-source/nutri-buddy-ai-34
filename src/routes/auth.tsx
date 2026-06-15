@@ -31,15 +31,15 @@ function AuthPage() {
         : await supabase.auth.signInWithPassword({ email, password });
       if (result.error) throw result.error;
       if (mode === "signup") toast.success("Check your email to confirm your account");
-      else navigate({ to: "/dashboard" });
+      else navigate({ to: "/onboarding" });
     } catch (error) { toast.error(error instanceof Error ? error.message : "Please try again"); }
     finally { setBusy(false); }
   }
 
   async function signInGoogle() {
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/dashboard`, extraParams: { prompt: "select_account" } });
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/onboarding`, extraParams: { prompt: "select_account" } });
     if (result.error) toast.error(result.error.message);
-    else if (!result.redirected) navigate({ to: "/dashboard" });
+    else if (!result.redirected) navigate({ to: "/onboarding" });
   }
 
   return <main className="grid min-h-screen lg:grid-cols-[1.05fr_.95fr]">
