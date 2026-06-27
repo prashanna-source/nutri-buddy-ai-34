@@ -4,10 +4,11 @@ import { Input } from "@/components/ui/input";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
+  ssr: false,
   head: () => ({ meta: [{ title: "Sign in — NutriAI" }, { name: "description", content: "Sign in to your personalized NutriAI nutrition dashboard." }] }),
   component: AuthPage,
 });
@@ -18,6 +19,11 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+
+  // If already signed in, get out of here. _authenticated routes will route to onboarding/dashboard.
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => { if (data.user) navigate({ to: "/dashboard", replace: true }); });
+  }, [navigate]);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault(); setBusy(true);
@@ -30,16 +36,16 @@ function AuthPage() {
         ? await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } })
         : await supabase.auth.signInWithPassword({ email, password });
       if (result.error) throw result.error;
-      if (mode === "signup") toast.success("Check your email to confirm your account");
-      else navigate({ to: "/onboarding" });
+      if (mode === "signup" && !result.data.session) { toast.success("Check your email to confirm your account"); return; }
+      navigate({ to: "/dashboard", replace: true });
     } catch (error) { toast.error(error instanceof Error ? error.message : "Please try again"); }
     finally { setBusy(false); }
   }
 
   async function signInGoogle() {
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/onboarding`, extraParams: { prompt: "select_account" } });
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin, extraParams: { prompt: "select_account" } });
     if (result.error) toast.error(result.error.message);
-    else if (!result.redirected) navigate({ to: "/onboarding" });
+    else if (!result.redirected) navigate({ to: "/dashboard", replace: true });
   }
 
   return <main className="grid min-h-screen lg:grid-cols-[1.05fr_.95fr]">
