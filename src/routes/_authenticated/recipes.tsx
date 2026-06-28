@@ -86,33 +86,11 @@ function RecipesPage() {
             <div className="flex flex-wrap gap-2">{PREFERENCES.map((p) => <Chip key={p} active={preference === p} onClick={() => setPreference(p)}>{p}</Chip>)}</div>
           </div>
           <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">Ingredients on hand</p>
-            <div className="flex flex-wrap gap-2">
-              {ingredients.map((ing) => (
-                <span key={ing} className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-sm text-primary-foreground">
-                  {ing}
-                  <button onClick={() => setIngredients(ingredients.filter((x) => x !== ing))} className="hover:opacity-70"><X className="size-3" /></button>
-                </span>
-              ))}
-            </div>
-            <div className="mt-3 flex gap-2">
-              <Input
-                value={ingredientInput}
-                onChange={(e) => setIngredientInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addIngredient(ingredientInput); } }}
-                placeholder="Type an ingredient and press Enter"
-              />
-              <Button type="button" variant="outline" onClick={() => addIngredient(ingredientInput)}><Plus className="size-4" /></Button>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {INGREDIENT_SUGGESTIONS.map((s) => (
-                <button key={s} type="button" onClick={() => toggleSuggestion(s)}
-                  className={`flex items-center gap-1 rounded-full border px-3 py-1 text-xs ${ingredients.includes(s) ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
-                  {ingredients.includes(s) && <Check className="size-3" />} {s}
-                </button>
-              ))}
-            </div>
-          </div>
+          <p className="rounded-xl bg-muted/40 p-3 text-xs text-muted-foreground">
+            <Check className="mr-1 inline size-3 text-primary" />
+            No need to list ingredients — the AI uses a typical Indian/Nepali household pantry and tunes the dish to your health profile.
+          </p>
+
 
           <Button variant="saffron" size="lg" className="w-full rounded-xl" disabled={gen.isPending} onClick={() => gen.mutate()}>
             <Sparkles className="size-4" />
