@@ -8,7 +8,6 @@ const inputSchema = z.object({
   difficulty: z.enum(["Easy", "Medium", "Hard"]).default("Easy"),
   cuisine: z.string().default("Indian"),
   preference: z.string().default("Balanced"),
-  ingredients: z.array(z.string()).default([]),
 });
 
 const recipeSchema = z.object({
