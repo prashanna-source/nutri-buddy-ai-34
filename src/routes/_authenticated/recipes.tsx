@@ -1,10 +1,9 @@
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { addRecipeToMeals, deleteRecipe, generateRecipe, listRecipes } from "@/lib/recipes.functions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, Plus, Sparkles, Trash2, X } from "lucide-react";
+import { Check, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -14,10 +13,6 @@ const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack"] as const;
 const DIFFICULTIES = ["Easy", "Medium", "Hard"] as const;
 const CUISINES = ["Indian", "Nepali", "Chinese", "Italian", "Mediterranean", "Continental", "Thai"];
 const PREFERENCES = ["Balanced", "High Protein", "Low Carb", "Budget Friendly", "Quick Meal"];
-const INGREDIENT_SUGGESTIONS = [
-  "Rice", "Paneer", "Onion", "Tomato", "Spinach", "Eggs", "Milk", "Dal", "Chicken",
-  "Yogurt", "Potato", "Cauliflower", "Chickpeas", "Oats", "Soy Chunks", "Tofu",
-];
 
 function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -40,23 +35,10 @@ function RecipesPage() {
   const [difficulty, setDifficulty] = useState<typeof DIFFICULTIES[number]>("Easy");
   const [cuisine, setCuisine] = useState("Indian");
   const [preference, setPreference] = useState("Balanced");
-  const [ingredients, setIngredients] = useState<string[]>([]);
-  const [ingredientInput, setIngredientInput] = useState("");
   const [current, setCurrent] = useState<any>(null);
 
-  function addIngredient(value: string) {
-    const v = value.trim();
-    if (!v) return;
-    if (ingredients.includes(v)) return;
-    setIngredients([...ingredients, v]);
-    setIngredientInput("");
-  }
-  function toggleSuggestion(s: string) {
-    setIngredients(ingredients.includes(s) ? ingredients.filter((x) => x !== s) : [...ingredients, s]);
-  }
-
   const gen = useMutation({
-    mutationFn: () => generateRecipe({ data: { mealType, difficulty, cuisine, preference, ingredients } }),
+    mutationFn: () => generateRecipe({ data: { mealType, difficulty, cuisine, preference } }),
     onSuccess: (r) => {
       setCurrent(r);
       qc.invalidateQueries({ queryKey: ["recipes"] });
@@ -83,7 +65,7 @@ function RecipesPage() {
         <header>
           <p className="text-xs font-bold uppercase tracking-[.25em] text-accent">Personalized AI</p>
           <h1 className="mt-2 font-serif text-4xl">Recipe studio</h1>
-          <p className="mt-2 text-muted-foreground">Tell us what you have. The AI will time and tune everything to your profile.</p>
+          <p className="mt-2 text-muted-foreground">Authentic Indian & Nepali home cooking, personalised to your health goals.</p>
         </header>
 
         <section className="premium-card space-y-6 rounded-2xl p-6">
@@ -103,34 +85,13 @@ function RecipesPage() {
             <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">Preference</p>
             <div className="flex flex-wrap gap-2">{PREFERENCES.map((p) => <Chip key={p} active={preference === p} onClick={() => setPreference(p)}>{p}</Chip>)}</div>
           </div>
-          <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">Ingredients on hand</p>
-            <div className="flex flex-wrap gap-2">
-              {ingredients.map((ing) => (
-                <span key={ing} className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-sm text-primary-foreground">
-                  {ing}
-                  <button onClick={() => setIngredients(ingredients.filter((x) => x !== ing))} className="hover:opacity-70"><X className="size-3" /></button>
-                </span>
-              ))}
-            </div>
-            <div className="mt-3 flex gap-2">
-              <Input
-                value={ingredientInput}
-                onChange={(e) => setIngredientInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addIngredient(ingredientInput); } }}
-                placeholder="Type an ingredient and press Enter"
-              />
-              <Button type="button" variant="outline" onClick={() => addIngredient(ingredientInput)}><Plus className="size-4" /></Button>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {INGREDIENT_SUGGESTIONS.map((s) => (
-                <button key={s} type="button" onClick={() => toggleSuggestion(s)}
-                  className={`flex items-center gap-1 rounded-full border px-3 py-1 text-xs ${ingredients.includes(s) ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
-                  {ingredients.includes(s) && <Check className="size-3" />} {s}
-                </button>
-              ))}
-            </div>
-          </div>
+          <p className="rounded-xl bg-muted/40 p-3 text-xs text-muted-foreground">
+            <Check className="mr-1 inline size-3 text-primary" />
+            No need to list ingredients — the AI uses a typical Indian/Nepali household pantry and tunes the dish to your health profile.
+          </p>
+
+
+
 
           <Button variant="saffron" size="lg" className="w-full rounded-xl" disabled={gen.isPending} onClick={() => gen.mutate()}>
             <Sparkles className="size-4" />
