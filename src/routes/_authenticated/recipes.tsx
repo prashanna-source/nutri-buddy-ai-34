@@ -65,7 +65,7 @@ function RecipesPage() {
         <header>
           <p className="text-xs font-bold uppercase tracking-[.25em] text-accent">Personalized AI</p>
           <h1 className="mt-2 font-serif text-4xl">Recipe studio</h1>
-          <p className="mt-2 text-muted-foreground">Tell us what you have. The AI will time and tune everything to your profile.</p>
+          <p className="mt-2 text-muted-foreground">Authentic Indian & Nepali home cooking, personalised to your health goals.</p>
         </header>
 
         <section className="premium-card space-y-6 rounded-2xl p-6">
