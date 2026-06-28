@@ -88,15 +88,40 @@ export const generateRecipe = createServerFn({ method: "POST" })
     try {
       const result = await generateText({
         model: gateway("google/gemini-3-flash-preview"),
-        experimental_output: Output.object({ schema: recipeSchema }),
-        prompt: `Create ONE personalized ${data.cuisine} ${data.mealType} recipe (${data.difficulty} difficulty, preference: ${data.preference}). ${ingredientsLine} ${profileLine} Be medically cautious — strictly respect allergies and conditions. Provide exact quantities and clear step-by-step instructions. Include three variations named "Quick Version", "High Protein Version", "Budget Friendly Version" and one nutritionally similar liquid alternative (smoothie or soup). Estimate realistic cooking time yourself.`,
+        prompt: `Create ONE personalized ${data.cuisine} ${data.mealType} recipe (${data.difficulty} difficulty, preference: ${data.preference}). ${ingredientsLine} ${profileLine} Be medically cautious — strictly respect allergies and conditions. Provide exact quantities and clear step-by-step instructions. Include three variations named "Quick Version", "High Protein Version", "Budget Friendly Version" and one nutritionally similar liquid alternative (smoothie or soup). Estimate realistic cooking time yourself.
+
+Respond with ONLY a single valid JSON object (no markdown fences, no commentary) matching exactly this TypeScript shape:
+{
+  "dishName": string,
+  "cuisineType": string,
+  "cookingTimeMinutes": number,
+  "difficulty": string,
+  "servings": number,
+  "calories": number,
+  "proteinG": number,
+  "carbsG": number,
+  "fatG": number,
+  "fiberG": number,
+  "ingredients": Array<{ "item": string, "quantity": string }>,
+  "instructions": string[],
+  "variations": Array<{ "name": string, "changes": string[] }>,
+  "liquidAlternative": { "name": string, "type": string, "calories": number, "proteinG": number, "carbsG": number, "fatG": number, "instructions": string[] }
+}`,
       });
-      // AI SDK puts structured output on result.experimental_output
-      output = (result as any).experimental_output ?? (result as any).output;
-      if (!output || !output.dishName) {
-        // fallback: parse text as JSON
-        output = JSON.parse(result.text);
+      const raw = result.text ?? "";
+      const cleaned = raw.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+      const start = cleaned.search(/[{[]/);
+      const end = cleaned.lastIndexOf("}");
+      if (start === -1 || end === -1) throw new Error("Model did not return JSON");
+      let jsonStr = cleaned.slice(start, end + 1);
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(jsonStr);
+      } catch {
+        jsonStr = jsonStr.replace(/,\s*}/g, "}").replace(/,\s*]/g, "]").replace(/[\x00-\x1F\x7F]/g, "");
+        parsed = JSON.parse(jsonStr);
       }
+      output = recipeSchema.parse(parsed);
     } catch (err) {
       console.error("Recipe generation failed", err);
       throw new Error(err instanceof Error ? err.message : "Recipe generation failed");
