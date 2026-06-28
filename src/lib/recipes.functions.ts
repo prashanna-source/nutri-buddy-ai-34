@@ -175,7 +175,8 @@ export const addRecipeToMeals = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!r) throw new Error("Recipe not found");
     const logged_on = new Date().toISOString().slice(0, 10);
-    const meal_type = data.mealType ?? r.meal_type ?? "snack";
+    const allowed = ["breakfast", "lunch", "dinner", "snack"] as const;
+    const meal_type = (data.mealType ?? (allowed.includes(r.meal_type as any) ? r.meal_type : "snack")) as typeof allowed[number];
     const insert = await context.supabase.from("meal_logs").insert({
       user_id: context.userId,
       meal_type,
