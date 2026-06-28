@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { addRecipeToMeals, deleteRecipe, generateRecipe, listRecipes } from "@/lib/recipes.functions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, Plus, Sparkles, Trash2, X } from "lucide-react";
+import { Check, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
