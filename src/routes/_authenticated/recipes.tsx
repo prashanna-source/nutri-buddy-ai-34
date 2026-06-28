@@ -85,11 +85,12 @@ function RecipesPage() {
             <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">Preference</p>
             <div className="flex flex-wrap gap-2">{PREFERENCES.map((p) => <Chip key={p} active={preference === p} onClick={() => setPreference(p)}>{p}</Chip>)}</div>
           </div>
-          <div>
           <p className="rounded-xl bg-muted/40 p-3 text-xs text-muted-foreground">
             <Check className="mr-1 inline size-3 text-primary" />
             No need to list ingredients — the AI uses a typical Indian/Nepali household pantry and tunes the dish to your health profile.
           </p>
+
+
 
 
           <Button variant="saffron" size="lg" className="w-full rounded-xl" disabled={gen.isPending} onClick={() => gen.mutate()}>
