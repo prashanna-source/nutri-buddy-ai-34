@@ -1,6 +1,5 @@
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { addRecipeToMeals, deleteRecipe, generateRecipe, listRecipes } from "@/lib/recipes.functions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
