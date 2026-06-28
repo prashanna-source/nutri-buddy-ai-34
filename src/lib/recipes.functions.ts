@@ -76,7 +76,7 @@ export const generateRecipe = createServerFn({ method: "POST" })
     const gateway = createNutriAiProvider(key);
 
     const targetsLine = profile
-      ? `Daily targets — calories: ${profile.daily_calorie_target ?? "n/a"} kcal, protein: ${profile.daily_protein_target ?? "n/a"}g, carbs: ${profile.daily_carb_target ?? "n/a"}g, fat: ${profile.daily_fat_target ?? "n/a"}g. This single meal should contribute a sensible share (roughly 25-35% for a main, 10-15% for a snack).`
+      ? `Daily targets — calories: ${profile.calorie_target ?? "n/a"} kcal, protein: ${profile.protein_target_g ?? "n/a"}g, carbs: ${profile.carbs_target_g ?? "n/a"}g, fat: ${profile.fat_target_g ?? "n/a"}g. This single meal should contribute a sensible share (roughly 25-35% for a main, 10-15% for a snack).`
       : "";
 
     const profileLine = profile
