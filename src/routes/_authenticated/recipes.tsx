@@ -13,10 +13,6 @@ const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack"] as const;
 const DIFFICULTIES = ["Easy", "Medium", "Hard"] as const;
 const CUISINES = ["Indian", "Nepali", "Chinese", "Italian", "Mediterranean", "Continental", "Thai"];
 const PREFERENCES = ["Balanced", "High Protein", "Low Carb", "Budget Friendly", "Quick Meal"];
-const INGREDIENT_SUGGESTIONS = [
-  "Rice", "Paneer", "Onion", "Tomato", "Spinach", "Eggs", "Milk", "Dal", "Chicken",
-  "Yogurt", "Potato", "Cauliflower", "Chickpeas", "Oats", "Soy Chunks", "Tofu",
-];
 
 function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
