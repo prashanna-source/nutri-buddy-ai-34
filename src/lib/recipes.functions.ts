@@ -75,9 +75,9 @@ export const generateRecipe = createServerFn({ method: "POST" })
     const { createNutriAiProvider } = await import("@/lib/ai-gateway.server");
     const gateway = createNutriAiProvider(key);
 
-    const ingredientsLine = data.ingredients.length
-      ? `Use primarily these ingredients on hand: ${data.ingredients.join(", ")}.`
-      : `Suggest affordable, commonly available ingredients.`;
+    const targetsLine = profile
+      ? `Daily targets — calories: ${profile.daily_calorie_target ?? "n/a"} kcal, protein: ${profile.daily_protein_target ?? "n/a"}g, carbs: ${profile.daily_carb_target ?? "n/a"}g, fat: ${profile.daily_fat_target ?? "n/a"}g. This single meal should contribute a sensible share (roughly 25-35% for a main, 10-15% for a snack).`
+      : "";
 
     const profileLine = profile
       ? `User profile — diet: ${profile.dietary_type ?? "any"}; goals: ${(profile.health_goals ?? []).join(", ") || "general health"}; allergies: ${(profile.allergies ?? []).join(", ") || "none"}; medical conditions: ${(profile.health_conditions ?? []).join(", ") || "none"}; deficiencies: ${(profile.deficiencies ?? []).join(", ") || "none"}.`
@@ -87,7 +87,16 @@ export const generateRecipe = createServerFn({ method: "POST" })
     try {
       const result = await generateText({
         model: gateway("google/gemini-3-flash-preview"),
-        prompt: `Create ONE personalized ${data.cuisine} ${data.mealType} recipe (${data.difficulty} difficulty, preference: ${data.preference}). ${ingredientsLine} ${profileLine} Be medically cautious — strictly respect allergies and conditions. Provide exact quantities and clear step-by-step instructions. Include three variations named "Quick Version", "High Protein Version", "Budget Friendly Version" and one nutritionally similar liquid alternative (smoothie or soup). Estimate realistic cooking time yourself.
+        prompt: `You are a South Asian home-cooking expert (authentic Indian and Nepali household cuisine). Create ONE traditional ${data.cuisine} ${data.mealType} recipe at ${data.difficulty} difficulty with a "${data.preference}" angle.
+
+DO NOT ask what ingredients the user has. ASSUME a typical Indian/Nepali household pantry: atta, rice, dal varieties (moong, masoor, toor, chana, rajma), basic spices (jeera, haldi, dhania, garam masala, hing, mustard seeds, red chilli, ajwain, timur for Nepali), onion, tomato, ginger, garlic, green chilli, curry leaves, coriander, mustard/sunflower oil, ghee, yogurt, milk, paneer, seasonal vegetables (aloo, gobi, palak, lauki, bhindi, baingan, methi, mooli, gajar, matar), eggs, besan, sooji, jaggery, lemon, plus Nepali staples like gundruk, jimbu, chiura when relevant.
+
+Choose a REAL named dish people actually cook at home (e.g. Moong Dal Khichdi, Palak Paneer, Aloo Gobi, Rajma Chawal, Masoor Dal, Vegetable Pulao, Besan Chilla, Poha, Upma, Dhindo, Kwati, Aloo Tama, Gundruk ko Jhol, Thukpa, Sadeko) — NOT a generic invented "healthy bowl". Personalise it to the user: tune oil, portion, grain choice, protein add-ons, salt and method to fit their goals (less oil + more fibre for weight loss; extra paneer/sprouts/egg for muscle gain; low-GI swaps for diabetes; iron-rich greens for iron deficiency; low-sodium for hypertension). Respect allergies and medical conditions strictly.
+
+${profileLine}
+${targetsLine}
+
+Include three variations named exactly "Quick Version", "High Protein Version", "Budget Friendly Version" with concrete swaps, and one liquid alternative that is a real traditional drink/soup (lassi, chaas, sattu sharbat, kwati soup, rasam, vegetable shorba, etc.). Use realistic household quantities (katori, cup, tbsp, tsp, grams) and clear step-by-step instructions a home cook can follow. Estimate cooking time yourself.
 
 Respond with ONLY a single valid JSON object (no markdown fences, no commentary) matching exactly this TypeScript shape:
 {
@@ -106,6 +115,7 @@ Respond with ONLY a single valid JSON object (no markdown fences, no commentary)
   "variations": Array<{ "name": string, "changes": string[] }>,
   "liquidAlternative": { "name": string, "type": string, "calories": number, "proteinG": number, "carbsG": number, "fatG": number, "instructions": string[] }
 }`,
+
       });
       const raw = result.text ?? "";
       const cleaned = raw.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
