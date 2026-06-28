@@ -35,23 +35,10 @@ function RecipesPage() {
   const [difficulty, setDifficulty] = useState<typeof DIFFICULTIES[number]>("Easy");
   const [cuisine, setCuisine] = useState("Indian");
   const [preference, setPreference] = useState("Balanced");
-  const [ingredients, setIngredients] = useState<string[]>([]);
-  const [ingredientInput, setIngredientInput] = useState("");
   const [current, setCurrent] = useState<any>(null);
 
-  function addIngredient(value: string) {
-    const v = value.trim();
-    if (!v) return;
-    if (ingredients.includes(v)) return;
-    setIngredients([...ingredients, v]);
-    setIngredientInput("");
-  }
-  function toggleSuggestion(s: string) {
-    setIngredients(ingredients.includes(s) ? ingredients.filter((x) => x !== s) : [...ingredients, s]);
-  }
-
   const gen = useMutation({
-    mutationFn: () => generateRecipe({ data: { mealType, difficulty, cuisine, preference, ingredients } }),
+    mutationFn: () => generateRecipe({ data: { mealType, difficulty, cuisine, preference } }),
     onSuccess: (r) => {
       setCurrent(r);
       qc.invalidateQueries({ queryKey: ["recipes"] });
