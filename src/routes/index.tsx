@@ -1,4 +1,5 @@
 import nutriaiMark from "@/assets/nutriai-mark.png";
+import heroDish from "@/assets/paneer-moong-salad.jpg";
 import { Button } from "@/components/ui/button";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, ChefHat, LineChart, MessageCircle, Salad, Sparkles, Target, Utensils } from "lucide-react";
