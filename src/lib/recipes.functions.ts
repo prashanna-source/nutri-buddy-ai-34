@@ -197,7 +197,12 @@ export const deleteRecipe = createServerFn({ method: "POST" })
 export const addRecipeToMeals = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ recipeId: z.string().uuid(), mealType: z.enum(["breakfast", "lunch", "dinner", "snack"]).optional() }).parse(input),
+    z.object({
+      recipeId: z.string().uuid(),
+      mealType: z.enum(["breakfast", "lunch", "dinner", "snack"]).optional(),
+      logged_on: z.string().optional(),
+      servings: z.number().positive().optional(),
+    }).parse(input),
   )
   .handler(async ({ data, context }) => {
     const { data: r, error } = await context.supabase
@@ -208,23 +213,25 @@ export const addRecipeToMeals = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!r) throw new Error("Recipe not found");
-    const logged_on = new Date().toISOString().slice(0, 10);
+    const logged_on = data.logged_on ?? new Date().toISOString().slice(0, 10);
     const allowed = ["breakfast", "lunch", "dinner", "snack"] as const;
     const meal_type = (data.mealType ?? (allowed.includes(r.meal_type as any) ? r.meal_type : "snack")) as typeof allowed[number];
+    const servings = data.servings ?? 1;
     const insert = await context.supabase.from("meal_logs").insert({
       user_id: context.userId,
       meal_type,
       meal_name: r.dish_name,
-      servings: 1,
-      calories: r.calories ?? 0,
-      protein_g: r.protein_g ?? 0,
-      carbs_g: r.carbs_g ?? 0,
-      fat_g: r.fat_g ?? 0,
-      fiber_g: r.fiber_g ?? 0,
+      servings,
+      calories: Math.round((r.calories ?? 0) * servings),
+      protein_g: Number(r.protein_g ?? 0) * servings,
+      carbs_g: Number(r.carbs_g ?? 0) * servings,
+      fat_g: Number(r.fat_g ?? 0) * servings,
+      fiber_g: Number(r.fiber_g ?? 0) * servings,
       recipe_id: data.recipeId,
       logged_on,
     });
     if (insert.error) throw new Error(insert.error.message);
+
     // refresh nutrition_logs
     const { data: rows } = await context.supabase
       .from("meal_logs")
