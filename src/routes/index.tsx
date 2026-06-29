@@ -80,7 +80,7 @@ function Landing() {
           <div className="relative">
             <div className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-gradient-to-br from-accent/20 via-primary/10 to-transparent blur-2xl" />
             <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-2xl shadow-primary/10">
-              <img src="/og-hero.jpg" onError={(e) => { (e.currentTarget as HTMLImageElement).src = new URL("../assets/paneer-moong-salad.jpg", import.meta.url).href; }} alt="A vibrant healthy bowl" className="aspect-[4/5] w-full object-cover" />
+              <img src={heroDish} alt="A vibrant healthy bowl" className="aspect-[4/5] w-full object-cover" />
             </div>
           </div>
         </div>
