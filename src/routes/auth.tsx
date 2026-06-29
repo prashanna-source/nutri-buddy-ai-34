@@ -26,27 +26,58 @@ function AuthPage() {
   }, [navigate]);
 
   async function submit(event: React.FormEvent) {
-    event.preventDefault(); setBusy(true);
+    event.preventDefault();
+    if (busy) return;
+    setBusy(true);
     try {
       if (mode === "forgot") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
-        if (error) throw error; toast.success("Password reset link sent"); return;
+        if (error) throw error;
+        toast.success("Password reset link sent — check your inbox");
+        return;
       }
-      const result = mode === "signup"
-        ? await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } })
-        : await supabase.auth.signInWithPassword({ email, password });
-      if (result.error) throw result.error;
-      if (mode === "signup" && !result.data.session) { toast.success("Check your email to confirm your account"); return; }
+      if (mode === "signup") {
+        const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
+        if (error) {
+          const msg = error.message.toLowerCase();
+          if (msg.includes("already") || msg.includes("registered")) {
+            toast.error("This email is already registered. Try signing in instead.");
+            setMode("login");
+            return;
+          }
+          throw error;
+        }
+        if (!data.session) { toast.success("Check your email to confirm your account"); return; }
+        toast.success("Welcome to NutriAI");
+        navigate({ to: "/dashboard", replace: true });
+        return;
+      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes("invalid")) throw new Error("Incorrect email or password");
+        throw error;
+      }
       navigate({ to: "/dashboard", replace: true });
-    } catch (error) { toast.error(error instanceof Error ? error.message : "Please try again"); }
-    finally { setBusy(false); }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Something went wrong — please try again");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function signInGoogle() {
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin, extraParams: { prompt: "select_account" } });
-    if (result.error) toast.error(result.error.message);
-    else if (!result.redirected) navigate({ to: "/dashboard", replace: true });
+    if (busy) return;
+    setBusy(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin, extraParams: { prompt: "select_account" } });
+      if (result.error) { toast.error(result.error.message); return; }
+      if (!result.redirected) navigate({ to: "/dashboard", replace: true });
+    } finally {
+      setBusy(false);
+    }
   }
+
 
   return <main className="grid min-h-screen lg:grid-cols-[1.05fr_.95fr]">
     <section className="relative hidden overflow-hidden bg-primary p-14 text-primary-foreground lg:flex lg:flex-col lg:justify-between heritage-pattern">
