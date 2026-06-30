@@ -7,7 +7,9 @@ import { loadProfile } from "@/lib/profile.functions";
 import { addRecipeToMeals, listRecipes } from "@/lib/recipes.functions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { ChefHat, ChevronLeft, ChevronRight, Pencil, Plus, Sparkles, Trash2, X } from "lucide-react";
+import { ChefHat, ChevronLeft, ChevronRight, Download, Pencil, Plus, Sparkles, Trash2, X } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { useMemo, useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
@@ -114,6 +116,96 @@ function MealsPage() {
     };
   });
 
+  function exportWeekPdf() {
+    const doc = new jsPDF();
+    const title = "NutriAI — Weekly Meal Summary";
+    doc.setFontSize(16);
+    doc.text(title, 14, 16);
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(fmtRange(weekStart), 14, 23);
+    if (profile?.full_name) doc.text(`Profile: ${profile.full_name}`, 14, 29);
+    doc.text(`Daily targets — ${targets.calories} kcal · ${targets.protein_g}P / ${targets.carbs_g}C / ${targets.fat_g}F / ${targets.fiber_g} fiber (g)`, 14, profile?.full_name ? 35 : 29);
+
+    // Daily summary table
+    const summaryRows = days.map((d, i) => {
+      const t = dayTotals(ymd(d));
+      const pct = Math.round((t.calories / Math.max(1, targets.calories)) * 100);
+      return [
+        `${DAY_LABELS[i]} ${d.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`,
+        `${t.calories} / ${targets.calories}`,
+        `${Math.round(t.protein_g)} / ${targets.protein_g}`,
+        `${Math.round(t.carbs_g)} / ${targets.carbs_g}`,
+        `${Math.round(t.fat_g)} / ${targets.fat_g}`,
+        `${Math.round(t.fiber_g)} / ${targets.fiber_g}`,
+        `${pct}%`,
+      ];
+    });
+    const weekTotals = days.reduce((a, d) => {
+      const t = dayTotals(ymd(d));
+      return {
+        calories: a.calories + t.calories,
+        protein_g: a.protein_g + t.protein_g,
+        carbs_g: a.carbs_g + t.carbs_g,
+        fat_g: a.fat_g + t.fat_g,
+        fiber_g: a.fiber_g + t.fiber_g,
+      };
+    }, { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0 });
+    summaryRows.push([
+      "Week total",
+      String(weekTotals.calories),
+      String(Math.round(weekTotals.protein_g)),
+      String(Math.round(weekTotals.carbs_g)),
+      String(Math.round(weekTotals.fat_g)),
+      String(Math.round(weekTotals.fiber_g)),
+      `${Math.round((weekTotals.calories / Math.max(1, targets.calories * 7)) * 100)}%`,
+    ]);
+
+    autoTable(doc, {
+      startY: 42,
+      head: [["Day", "Calories", "Protein (g)", "Carbs (g)", "Fat (g)", "Fiber (g)", "Cal %"]],
+      body: summaryRows,
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [201, 132, 58] },
+      foot: undefined,
+    });
+
+    // Per-day meal details
+    days.forEach((d, i) => {
+      const date = ymd(d);
+      const items = (mealsByDay.get(date) ?? []) as any[];
+      if (items.length === 0) return;
+      const startY = (doc as any).lastAutoTable.finalY + 8;
+      if (startY > 250) doc.addPage();
+      const y = (doc as any).lastAutoTable.finalY > 250 ? 20 : startY;
+      doc.setFontSize(12);
+      doc.setTextColor(20);
+      doc.text(`${DAY_LABELS[i]} — ${d.toLocaleDateString()}`, 14, y);
+      autoTable(doc, {
+        startY: y + 3,
+        head: [["Meal", "Item", "Servings", "kcal", "P", "C", "F", "Fiber"]],
+        body: items
+          .sort((a, b) => MEAL_TYPES.indexOf(a.meal_type) - MEAL_TYPES.indexOf(b.meal_type))
+          .map((m) => [
+            m.meal_type,
+            m.meal_name,
+            String(m.servings ?? 1),
+            String(m.calories ?? 0),
+            String(Math.round(Number(m.protein_g ?? 0))),
+            String(Math.round(Number(m.carbs_g ?? 0))),
+            String(Math.round(Number(m.fat_g ?? 0))),
+            String(Math.round(Number(m.fiber_g ?? 0))),
+          ]),
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [60, 110, 100] },
+      });
+    });
+
+    doc.save(`nutriai-week-${weekStartStr}.pdf`);
+    toast.success("PDF downloaded");
+  }
+
+
   // Mutations
   const [editing, setEditing] = useState<EditingMeal | null>(null);
   const [picker, setPicker] = useState<{ open: boolean; mealType: MealType } | null>(null);
@@ -204,6 +296,9 @@ function MealsPage() {
             </Button>
             <Button variant="outline" size="sm" className="ml-1 rounded-full" onClick={() => { const w = startOfWeek(new Date()); setWeekStart(w); setSelectedIdx((new Date().getDay() + 6) % 7); }}>Today</Button>
           </div>
+          <Button variant="outline" size="sm" className="rounded-full" onClick={() => exportWeekPdf()}>
+            <Download className="mr-1 size-3.5" /> Export PDF
+          </Button>
         </header>
 
         {/* Weekly summary */}
