@@ -206,6 +206,9 @@ function MealsPage() {
             </Button>
             <Button variant="outline" size="sm" className="ml-1 rounded-full" onClick={() => { const w = startOfWeek(new Date()); setWeekStart(w); setSelectedIdx((new Date().getDay() + 6) % 7); }}>Today</Button>
           </div>
+          <Button variant="outline" size="sm" className="rounded-full" onClick={() => exportWeekPdf()}>
+            <Download className="mr-1 size-3.5" /> Export PDF
+          </Button>
         </header>
 
         {/* Weekly summary */}
