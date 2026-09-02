@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { loadChat } from "@/lib/chat.functions";
 import { getDailyData } from "@/lib/meals.functions";
+import { calculateBMI, calculateTargets, hasBodyMetrics, waterTargetMl } from "@/lib/nutrition";
+
 import { loadProfile } from "@/lib/profile.functions";
 import { useChat } from "@ai-sdk/react";
 import { useQuery } from "@tanstack/react-query";
