@@ -106,8 +106,18 @@ function ProfilePage() {
             <div><p className="text-muted-foreground">Protein</p><p className="text-xl font-bold">{profile?.protein_target_g ?? "—"}g</p></div>
             <div><p className="text-muted-foreground">Carbs</p><p className="text-xl font-bold">{profile?.carbs_target_g ?? "—"}g</p></div>
             <div><p className="text-muted-foreground">Fat</p><p className="text-xl font-bold">{profile?.fat_target_g ?? "—"}g</p></div>
+            <div><p className="text-muted-foreground">Fiber</p><p className="text-xl font-bold">{profile?.fiber_target_g ?? "—"}g</p></div>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">Recalculated automatically when you save.</p>
+          {preview ? <>
+            <div className="mt-5 grid gap-3 sm:grid-cols-4 border-t border-border pt-4 text-sm">
+              <div><p className="text-muted-foreground">BMR</p><p className="text-xl font-bold">{preview.targets.bmr} kcal</p></div>
+              <div><p className="text-muted-foreground">TDEE</p><p className="text-xl font-bold">{preview.targets.tdee} kcal</p></div>
+              <div><p className="text-muted-foreground">BMI</p><p className="text-xl font-bold">{preview.bmi?.value ?? "—"} <span className="text-xs font-medium text-muted-foreground">{preview.bmi?.band}</span></p></div>
+              <div><p className="text-muted-foreground">Water</p><p className="text-xl font-bold">{(preview.water / 1000).toFixed(1)} L</p></div>
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">Live preview from your current entries (Mifflin–St Jeor + activity factor {ACTIVITY_MULTIPLIER[form.activity_level ?? "Moderately Active"]}). Saving will store calories {preview.targets.calorie_target}, protein {preview.targets.protein_target_g}g, carbs {preview.targets.carbs_target_g}g, fat {preview.targets.fat_target_g}g, fiber {preview.targets.fiber_target_g}g.</p>
+          </> : <p className="mt-3 text-xs text-muted-foreground">Enter age, height and weight to compute your BMR, TDEE and macro targets.</p>}
+
         </section>
         <Button variant="saffron" size="lg" className="w-full rounded-xl" disabled={busy} onClick={save}>{busy ? "Saving…" : "Save profile"}</Button>
       </>}
