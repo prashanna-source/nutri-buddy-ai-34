@@ -80,8 +80,9 @@ export const generateRecipe = createServerFn({ method: "POST" })
       : "";
 
     const profileLine = profile
-      ? `User profile — diet: ${profile.dietary_type ?? "any"}; goals: ${(profile.health_goals ?? []).join(", ") || "general health"}; allergies: ${(profile.allergies ?? []).join(", ") || "none"}; medical conditions: ${(profile.health_conditions ?? []).join(", ") || "none"}; deficiencies: ${(profile.deficiencies ?? []).join(", ") || "none"}.`
+      ? `User profile — diet: ${profile.dietary_type ?? "any"}; goals: ${(profile.health_goals ?? []).join(", ") || "general health"}; allergies: ${(profile.allergies ?? []).join(", ") || "none"}; medical conditions: ${(profile.health_conditions ?? []).join(", ") || "none"}; deficiencies: ${(profile.deficiencies ?? []).join(", ") || "none"}; preferred cuisines: ${(profile.cuisine_preferences ?? []).join(", ") || "any"}; foods they actually eat and enjoy (build the dish around these where sensible): ${(profile.food_preferences ?? []).join(", ") || "typical household staples"}; region: ${[profile.city, profile.country].filter(Boolean).join(", ") || "South Asia"}.`
       : "";
+
 
     let output: z.infer<typeof recipeSchema>;
     try {

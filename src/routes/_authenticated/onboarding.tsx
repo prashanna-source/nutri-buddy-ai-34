@@ -11,10 +11,15 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/onboarding")({ component: Onboarding });
 
 const goals = ["Weight Loss", "Fat Loss", "Muscle Gain", "Weight Gain", "Maintenance", "Healthy Eating", "Diabetes Management", "Heart Health", "Gut Health", "High Protein", "Low Carb", "Improve Energy", "Improve Immunity"];
-const cuisines = ["Indian", "Nepali", "South Indian", "North Indian", "Chinese", "Thai", "Italian", "Continental", "Mediterranean"];
-const allergiesList = ["Dairy", "Peanuts", "Tree Nuts", "Soy", "Wheat", "Seafood", "Eggs"];
-const conditions = ["Diabetes", "High Blood Pressure", "Thyroid", "Cholesterol", "PCOS", "Gastric Issues", "IBS"];
-const deficiencies = ["Iron Deficiency", "Vitamin D Deficiency", "Vitamin B12 Deficiency", "Calcium Deficiency", "Protein Deficiency"];
+const cuisines = ["Nepali (Hill)", "Newari", "Terai / Madhesi", "Thakali", "Himalayan / Tibetan", "North Indian", "South Indian", "Bengali", "Gujarati", "Maharashtrian", "Punjabi", "Rajasthani", "Indo-Chinese"];
+const stapleFoods = ["Dal bhat", "Roti / Chapati", "Dhindo", "Brown rice", "Red rice", "Millet (kodo)", "Buckwheat (phapar)", "Poha", "Idli / Dosa", "Upma", "Paratha", "Khichdi", "Sel roti", "Chiura (beaten rice)"];
+const proteinFoods = ["Moong dal", "Masoor dal", "Kalo dal (urad)", "Rajma", "Chana / Chickpeas", "Kwati (mixed beans)", "Paneer", "Tofu / Soya chunks", "Eggs", "Curd / Dahi", "Buffalo meat", "Chicken", "Mutton", "Fish (rohu/trout)", "Peanuts", "Sattu"];
+const vegFoods = ["Saag (mustard greens)", "Palak", "Gundruk", "Bhindi", "Karela", "Lauki", "Pumpkin (farsi)", "Cauliflower", "Bamboo shoot (tama)", "Radish (mula)", "Beans", "Sweet potato", "Tarul (yam)", "Mushroom"];
+const flavourFoods = ["Achar (tomato/mula)", "Golbheda ko achar", "Coconut chutney", "Sambar", "Kadhi", "Jhol (thin curry)", "Sukuti", "Momo", "Chowmein", "Curd rice", "Roasted soybean", "Fruits & seasonal chaat"];
+const allergiesList = ["Dairy", "Peanuts", "Tree Nuts", "Soy", "Wheat / Gluten", "Seafood", "Eggs", "Mustard", "Sesame"];
+const conditions = ["Diabetes", "High Blood Pressure", "Thyroid", "Cholesterol", "PCOS", "Gastric Issues", "IBS", "Fatty Liver", "Uric Acid / Gout", "Kidney Concerns"];
+const deficiencies = ["Iron Deficiency", "Vitamin D Deficiency", "Vitamin B12 Deficiency", "Calcium Deficiency", "Protein Deficiency", "Zinc Deficiency", "Folate Deficiency"];
+
 
 function Onboarding() {
   const navigate = useNavigate();
@@ -94,8 +99,13 @@ function Onboarding() {
 
       {step === 2 && <div className="space-y-7">
         <div><h2 className="mb-3 font-semibold">Cuisine preferences</h2>{choice("cuisine_preferences", cuisines)}</div>
-        <div><h2 className="mb-3 font-semibold">Food preferences</h2>{choice("food_preferences", ["Spicy", "Mild", "Sweet", "Savory"])}</div>
+        <div><h2 className="mb-1 font-semibold">Staples you eat most</h2><p className="mb-3 text-sm text-muted-foreground">Pick what actually shows up on your plate — recipes are built around these.</p>{choice("food_preferences", stapleFoods)}</div>
+        <div><h2 className="mb-3 font-semibold">Protein sources you like</h2>{choice("food_preferences", proteinFoods)}</div>
+        <div><h2 className="mb-3 font-semibold">Vegetables & greens</h2>{choice("food_preferences", vegFoods)}</div>
+        <div><h2 className="mb-3 font-semibold">Sides, flavours & favourites</h2>{choice("food_preferences", flavourFoods)}</div>
+        <div><h2 className="mb-3 font-semibold">Taste profile</h2>{choice("food_preferences", ["Spicy", "Mild", "Sweet", "Savory", "Tangy", "Low oil"])}</div>
       </div>}
+
 
       {step === 3 && <div className="space-y-7">
         <div><h2 className="mb-3 font-semibold">Allergies</h2>{choice("allergies", allergiesList)}</div>

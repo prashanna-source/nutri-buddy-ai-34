@@ -48,3 +48,22 @@ export function calculateTargets(profile: {
   const fiber = Math.round((calories / 1000) * 14);
   return { bmr, tdee, calorie_target: calories, protein_target_g: protein, carbs_target_g: carbs, fat_target_g: fat, fiber_target_g: fiber };
 }
+
+export function hasBodyMetrics(profile: { age?: number | null; height_cm?: number | null; weight_kg?: number | null } | null | undefined) {
+  return Boolean(profile && Number(profile.age) > 0 && Number(profile.height_cm) > 0 && Number(profile.weight_kg) > 0);
+}
+
+export function calculateBMI(heightCm?: number | null, weightKg?: number | null) {
+  const h = Number(heightCm), w = Number(weightKg);
+  if (!h || !w) return null;
+  const bmi = w / Math.pow(h / 100, 2);
+  const band = bmi < 18.5 ? "Underweight" : bmi < 25 ? "Healthy" : bmi < 30 ? "Overweight" : "Obese";
+  return { value: Math.round(bmi * 10) / 10, band };
+}
+
+// ~35 ml per kg body weight, nudged up with activity.
+export function waterTargetMl(weightKg?: number | null, activityLevel?: string | null) {
+  const w = Number(weightKg) || 65;
+  const bump = (ACTIVITY_MULTIPLIER[activityLevel ?? "Moderately Active"] ?? 1.55) - 1.2;
+  return Math.round((w * 35 + bump * 500) / 50) * 50;
+}

@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { loadChat } from "@/lib/chat.functions";
 import { getDailyData } from "@/lib/meals.functions";
+import { calculateBMI, calculateTargets, hasBodyMetrics, waterTargetMl } from "@/lib/nutrition";
+
 import { loadProfile } from "@/lib/profile.functions";
 import { useChat } from "@ai-sdk/react";
 import { useQuery } from "@tanstack/react-query";
@@ -41,11 +43,18 @@ function DashboardContent({ initial, transport, userEmail, inputRef }: { initial
 
   const firstName = profile?.full_name?.split(" ")[0] || userEmail.split("@")[0] || "friend";
   const totals = daily?.todayTotals ?? { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0 };
-  const calTarget = profile?.calorie_target ?? 2000;
-  const proTarget = profile?.protein_target_g ?? 100;
-  const fiberTarget = profile?.fiber_target_g ?? 28;
+  const metricsReady = hasBodyMetrics(profile);
+  // Real Mifflin–St Jeor derivation from the saved profile; stored targets are the source of truth.
+  const derived = useMemo(() => (profile ? calculateTargets(profile) : null), [profile]);
+  const calTarget = profile?.calorie_target ?? derived?.calorie_target ?? 2000;
+  const proTarget = profile?.protein_target_g ?? derived?.protein_target_g ?? 100;
+  const fiberTarget = profile?.fiber_target_g ?? derived?.fiber_target_g ?? 28;
+  const carbTarget = profile?.carbs_target_g ?? derived?.carbs_target_g ?? 250;
+  const bmi = calculateBMI(profile?.height_cm, profile?.weight_kg);
+  const water = waterTargetMl(profile?.weight_kg, profile?.activity_level);
   const proteinGap = Math.max(0, proTarget - Math.round(Number(totals.protein_g)));
   const calorieGap = Math.max(0, calTarget - totals.calories);
+
 
   const chartData = useMemo(() => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -62,7 +71,7 @@ function DashboardContent({ initial, transport, userEmail, inputRef }: { initial
   const cards = [
     { t: "Calories", v: String(totals.calories), s: `/ ${calTarget}`, p: Math.min(100, (totals.calories / Math.max(1, calTarget)) * 100), c: "bg-primary" },
     { t: "Protein", v: `${Math.round(Number(totals.protein_g))}g`, s: `/ ${proTarget}g`, p: Math.min(100, (Number(totals.protein_g) / Math.max(1, proTarget)) * 100), c: "bg-accent" },
-    { t: "Carbs", v: `${Math.round(Number(totals.carbs_g))}g`, s: `/ ${profile?.carbs_target_g ?? 250}g`, p: Math.min(100, (Number(totals.carbs_g) / Math.max(1, profile?.carbs_target_g ?? 250)) * 100), c: "bg-chart-2" },
+    { t: "Carbs", v: `${Math.round(Number(totals.carbs_g))}g`, s: `/ ${carbTarget}g`, p: Math.min(100, (Number(totals.carbs_g) / Math.max(1, carbTarget)) * 100), c: "bg-chart-2" },
     { t: "Fiber", v: `${Math.round(Number(totals.fiber_g))}g`, s: `/ ${fiberTarget}g`, p: Math.min(100, (Number(totals.fiber_g) / Math.max(1, fiberTarget)) * 100), c: "bg-chart-3" },
   ];
 
@@ -88,6 +97,29 @@ function DashboardContent({ initial, transport, userEmail, inputRef }: { initial
               </div>
             ))}
           </section>
+
+          <section className="premium-card rounded-3xl p-6">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Energy blueprint</p>
+                <h3 className="mt-1 font-serif text-2xl">Calculated from your body & activity</h3>
+              </div>
+              <Link to="/profile"><Button variant="ghost" size="sm" className="rounded-full">Update metrics</Button></Link>
+            </div>
+            {metricsReady && derived ? <>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+                <div><p className="text-muted-foreground">BMR (Mifflin–St Jeor)</p><p className="text-xl font-bold">{derived.bmr} kcal</p></div>
+                <div><p className="text-muted-foreground">TDEE ({profile?.activity_level})</p><p className="text-xl font-bold">{derived.tdee} kcal</p></div>
+                <div><p className="text-muted-foreground">Goal-adjusted target</p><p className="text-xl font-bold">{calTarget} kcal <span className="text-xs font-medium text-muted-foreground">({derived.tdee ? (calTarget - derived.tdee >= 0 ? "+" : "") + (calTarget - derived.tdee) : 0})</span></p></div>
+                <div><p className="text-muted-foreground">BMI</p><p className="text-xl font-bold">{bmi?.value ?? "—"} <span className="text-xs font-medium text-muted-foreground">{bmi?.band}</span></p></div>
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground">Macros: {proTarget}g protein · {carbTarget}g carbs · {profile?.fat_target_g}g fat · {fiberTarget}g fiber · water {(water / 1000).toFixed(1)} L/day. Recalculated whenever you save your profile.</p>
+            </> : (
+              <p className="mt-5 text-sm text-muted-foreground">Add your age, height, weight and activity level in your profile and we’ll compute your BMR, TDEE and macro targets instead of using generic numbers.</p>
+            )}
+          </section>
+
+
 
           <section className="relative min-h-[300px] overflow-hidden rounded-[2rem] bg-primary text-primary-foreground shadow-2xl shadow-primary/20">
             <div className="relative z-10 max-w-[58%] p-7 md:p-10">
