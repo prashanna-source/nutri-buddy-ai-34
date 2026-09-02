@@ -71,7 +71,7 @@ function DashboardContent({ initial, transport, userEmail, inputRef }: { initial
   const cards = [
     { t: "Calories", v: String(totals.calories), s: `/ ${calTarget}`, p: Math.min(100, (totals.calories / Math.max(1, calTarget)) * 100), c: "bg-primary" },
     { t: "Protein", v: `${Math.round(Number(totals.protein_g))}g`, s: `/ ${proTarget}g`, p: Math.min(100, (Number(totals.protein_g) / Math.max(1, proTarget)) * 100), c: "bg-accent" },
-    { t: "Carbs", v: `${Math.round(Number(totals.carbs_g))}g`, s: `/ ${profile?.carbs_target_g ?? 250}g`, p: Math.min(100, (Number(totals.carbs_g) / Math.max(1, profile?.carbs_target_g ?? 250)) * 100), c: "bg-chart-2" },
+    { t: "Carbs", v: `${Math.round(Number(totals.carbs_g))}g`, s: `/ ${carbTarget}g`, p: Math.min(100, (Number(totals.carbs_g) / Math.max(1, carbTarget)) * 100), c: "bg-chart-2" },
     { t: "Fiber", v: `${Math.round(Number(totals.fiber_g))}g`, s: `/ ${fiberTarget}g`, p: Math.min(100, (Number(totals.fiber_g) / Math.max(1, fiberTarget)) * 100), c: "bg-chart-3" },
   ];
 
