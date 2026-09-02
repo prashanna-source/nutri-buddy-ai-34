@@ -86,6 +86,16 @@ function ProfilePage() {
         </section>
         <section className="premium-card space-y-3 rounded-2xl p-6"><h2 className="font-serif text-xl">Health goals</h2><div className="flex flex-wrap gap-2">{goalsList.map(g => chip((form.health_goals ?? []).includes(g), g, () => toggle("health_goals", g)))}</div></section>
         <section className="premium-card space-y-3 rounded-2xl p-6"><h2 className="font-serif text-xl">Cuisines</h2><div className="flex flex-wrap gap-2">{cuisines.map(g => chip((form.cuisine_preferences ?? []).includes(g), g, () => toggle("cuisine_preferences", g)))}</div></section>
+        <section className="premium-card space-y-4 rounded-2xl p-6">
+          <div><h2 className="font-serif text-xl">Foods you actually eat</h2><p className="text-sm text-muted-foreground">Recipes are built around these Indian and Nepali staples.</p></div>
+          {foodGroups.map(group => (
+            <div key={group.title}>
+              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">{group.title}</p>
+              <div className="flex flex-wrap gap-2">{group.items.map(g => chip((form.food_preferences ?? []).includes(g), g, () => toggle("food_preferences", g)))}</div>
+            </div>
+          ))}
+        </section>
+
         <section className="premium-card space-y-3 rounded-2xl p-6"><h2 className="font-serif text-xl">Allergies</h2><div className="flex flex-wrap gap-2">{allergiesList.map(g => chip((form.allergies ?? []).includes(g), g, () => toggle("allergies", g)))}</div></section>
         <section className="premium-card space-y-3 rounded-2xl p-6"><h2 className="font-serif text-xl">Health conditions</h2><div className="flex flex-wrap gap-2">{conditions.map(g => chip((form.health_conditions ?? []).includes(g), g, () => toggle("health_conditions", g)))}</div></section>
         <section className="premium-card space-y-3 rounded-2xl p-6"><h2 className="font-serif text-xl">Deficiencies</h2><div className="flex flex-wrap gap-2">{deficiencies.map(g => chip((form.deficiencies ?? []).includes(g), g, () => toggle("deficiencies", g)))}</div></section>
