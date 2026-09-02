@@ -5,7 +5,7 @@ import { ACTIVITY_MULTIPLIER, calculateBMI, calculateTargets, cmToFeetInches, fe
 import { loadProfile, saveProfile } from "@/lib/profile.functions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/profile")({ component: ProfilePage });
