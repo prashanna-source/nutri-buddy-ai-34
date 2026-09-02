@@ -98,6 +98,29 @@ function DashboardContent({ initial, transport, userEmail, inputRef }: { initial
             ))}
           </section>
 
+          <section className="premium-card rounded-3xl p-6">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Energy blueprint</p>
+                <h3 className="mt-1 font-serif text-2xl">Calculated from your body & activity</h3>
+              </div>
+              <Link to="/profile"><Button variant="ghost" size="sm" className="rounded-full">Update metrics</Button></Link>
+            </div>
+            {metricsReady && derived ? <>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+                <div><p className="text-muted-foreground">BMR (Mifflin–St Jeor)</p><p className="text-xl font-bold">{derived.bmr} kcal</p></div>
+                <div><p className="text-muted-foreground">TDEE ({profile?.activity_level})</p><p className="text-xl font-bold">{derived.tdee} kcal</p></div>
+                <div><p className="text-muted-foreground">Goal-adjusted target</p><p className="text-xl font-bold">{calTarget} kcal <span className="text-xs font-medium text-muted-foreground">({derived.tdee ? (calTarget - derived.tdee >= 0 ? "+" : "") + (calTarget - derived.tdee) : 0})</span></p></div>
+                <div><p className="text-muted-foreground">BMI</p><p className="text-xl font-bold">{bmi?.value ?? "—"} <span className="text-xs font-medium text-muted-foreground">{bmi?.band}</span></p></div>
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground">Macros: {proTarget}g protein · {carbTarget}g carbs · {profile?.fat_target_g}g fat · {fiberTarget}g fiber · water {(water / 1000).toFixed(1)} L/day. Recalculated whenever you save your profile.</p>
+            </> : (
+              <p className="mt-5 text-sm text-muted-foreground">Add your age, height, weight and activity level in your profile and we’ll compute your BMR, TDEE and macro targets instead of using generic numbers.</p>
+            )}
+          </section>
+
+
+
           <section className="relative min-h-[300px] overflow-hidden rounded-[2rem] bg-primary text-primary-foreground shadow-2xl shadow-primary/20">
             <div className="relative z-10 max-w-[58%] p-7 md:p-10">
               <span className="rounded-full bg-primary-foreground/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.2em] text-accent">AI recommended</span>
