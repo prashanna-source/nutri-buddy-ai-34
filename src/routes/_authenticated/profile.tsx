@@ -1,7 +1,7 @@
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cmToFeetInches, feetInchesToCm } from "@/lib/nutrition";
+import { ACTIVITY_MULTIPLIER, calculateBMI, calculateTargets, cmToFeetInches, feetInchesToCm, hasBodyMetrics, waterTargetMl } from "@/lib/nutrition";
 import { loadProfile, saveProfile } from "@/lib/profile.functions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
