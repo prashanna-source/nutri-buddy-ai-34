@@ -11,10 +11,15 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/onboarding")({ component: Onboarding });
 
 const goals = ["Weight Loss", "Fat Loss", "Muscle Gain", "Weight Gain", "Maintenance", "Healthy Eating", "Diabetes Management", "Heart Health", "Gut Health", "High Protein", "Low Carb", "Improve Energy", "Improve Immunity"];
-const cuisines = ["Indian", "Nepali", "South Indian", "North Indian", "Chinese", "Thai", "Italian", "Continental", "Mediterranean"];
-const allergiesList = ["Dairy", "Peanuts", "Tree Nuts", "Soy", "Wheat", "Seafood", "Eggs"];
-const conditions = ["Diabetes", "High Blood Pressure", "Thyroid", "Cholesterol", "PCOS", "Gastric Issues", "IBS"];
-const deficiencies = ["Iron Deficiency", "Vitamin D Deficiency", "Vitamin B12 Deficiency", "Calcium Deficiency", "Protein Deficiency"];
+const cuisines = ["Nepali (Hill)", "Newari", "Terai / Madhesi", "Thakali", "Himalayan / Tibetan", "North Indian", "South Indian", "Bengali", "Gujarati", "Maharashtrian", "Punjabi", "Rajasthani", "Indo-Chinese"];
+const stapleFoods = ["Dal bhat", "Roti / Chapati", "Dhindo", "Brown rice", "Red rice", "Millet (kodo)", "Buckwheat (phapar)", "Poha", "Idli / Dosa", "Upma", "Paratha", "Khichdi", "Sel roti", "Chiura (beaten rice)"];
+const proteinFoods = ["Moong dal", "Masoor dal", "Kalo dal (urad)", "Rajma", "Chana / Chickpeas", "Kwati (mixed beans)", "Paneer", "Tofu / Soya chunks", "Eggs", "Curd / Dahi", "Buffalo meat", "Chicken", "Mutton", "Fish (rohu/trout)", "Peanuts", "Sattu"];
+const vegFoods = ["Saag (mustard greens)", "Palak", "Gundruk", "Bhindi", "Karela", "Lauki", "Pumpkin (farsi)", "Cauliflower", "Bamboo shoot (tama)", "Radish (mula)", "Beans", "Sweet potato", "Tarul (yam)", "Mushroom"];
+const flavourFoods = ["Achar (tomato/mula)", "Golbheda ko achar", "Coconut chutney", "Sambar", "Kadhi", "Jhol (thin curry)", "Sukuti", "Momo", "Chowmein", "Curd rice", "Roasted soybean", "Fruits & seasonal chaat"];
+const allergiesList = ["Dairy", "Peanuts", "Tree Nuts", "Soy", "Wheat / Gluten", "Seafood", "Eggs", "Mustard", "Sesame"];
+const conditions = ["Diabetes", "High Blood Pressure", "Thyroid", "Cholesterol", "PCOS", "Gastric Issues", "IBS", "Fatty Liver", "Uric Acid / Gout", "Kidney Concerns"];
+const deficiencies = ["Iron Deficiency", "Vitamin D Deficiency", "Vitamin B12 Deficiency", "Calcium Deficiency", "Protein Deficiency", "Zinc Deficiency", "Folate Deficiency"];
+
 
 function Onboarding() {
   const navigate = useNavigate();
