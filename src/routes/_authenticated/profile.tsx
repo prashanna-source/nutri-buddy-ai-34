@@ -41,6 +41,20 @@ function ProfilePage() {
     setForm({ ...profile, feet, inches });
   }, [profile]);
 
+  // Live BMR/TDEE/macro preview from the values currently in the form.
+  const preview = useMemo(() => {
+    if (!form) return null;
+    const height_cm = form.feet || form.inches ? feetInchesToCm(Number(form.feet) || 0, Number(form.inches) || 0) : Number(form.height_cm) || null;
+    const candidate = { ...form, height_cm, age: Number(form.age) || null, weight_kg: Number(form.weight_kg) || null };
+    if (!hasBodyMetrics(candidate)) return null;
+    return {
+      targets: calculateTargets(candidate),
+      bmi: calculateBMI(height_cm, candidate.weight_kg),
+      water: waterTargetMl(candidate.weight_kg, form.activity_level),
+    };
+  }, [form]);
+
+
   function toggle(key: string, val: string) {
     setForm((f: any) => ({ ...f, [key]: (f[key] ?? []).includes(val) ? f[key].filter((x: string) => x !== val) : [...(f[key] ?? []), val] }));
   }
