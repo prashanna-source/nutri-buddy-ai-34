@@ -41,11 +41,18 @@ function DashboardContent({ initial, transport, userEmail, inputRef }: { initial
 
   const firstName = profile?.full_name?.split(" ")[0] || userEmail.split("@")[0] || "friend";
   const totals = daily?.todayTotals ?? { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0 };
-  const calTarget = profile?.calorie_target ?? 2000;
-  const proTarget = profile?.protein_target_g ?? 100;
-  const fiberTarget = profile?.fiber_target_g ?? 28;
+  const metricsReady = hasBodyMetrics(profile);
+  // Real Mifflin–St Jeor derivation from the saved profile; stored targets are the source of truth.
+  const derived = useMemo(() => (profile ? calculateTargets(profile) : null), [profile]);
+  const calTarget = profile?.calorie_target ?? derived?.calorie_target ?? 2000;
+  const proTarget = profile?.protein_target_g ?? derived?.protein_target_g ?? 100;
+  const fiberTarget = profile?.fiber_target_g ?? derived?.fiber_target_g ?? 28;
+  const carbTarget = profile?.carbs_target_g ?? derived?.carbs_target_g ?? 250;
+  const bmi = calculateBMI(profile?.height_cm, profile?.weight_kg);
+  const water = waterTargetMl(profile?.weight_kg, profile?.activity_level);
   const proteinGap = Math.max(0, proTarget - Math.round(Number(totals.protein_g)));
   const calorieGap = Math.max(0, calTarget - totals.calories);
+
 
   const chartData = useMemo(() => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
