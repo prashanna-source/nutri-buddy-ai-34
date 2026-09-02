@@ -99,8 +99,13 @@ function Onboarding() {
 
       {step === 2 && <div className="space-y-7">
         <div><h2 className="mb-3 font-semibold">Cuisine preferences</h2>{choice("cuisine_preferences", cuisines)}</div>
-        <div><h2 className="mb-3 font-semibold">Food preferences</h2>{choice("food_preferences", ["Spicy", "Mild", "Sweet", "Savory"])}</div>
+        <div><h2 className="mb-1 font-semibold">Staples you eat most</h2><p className="mb-3 text-sm text-muted-foreground">Pick what actually shows up on your plate — recipes are built around these.</p>{choice("food_preferences", stapleFoods)}</div>
+        <div><h2 className="mb-3 font-semibold">Protein sources you like</h2>{choice("food_preferences", proteinFoods)}</div>
+        <div><h2 className="mb-3 font-semibold">Vegetables & greens</h2>{choice("food_preferences", vegFoods)}</div>
+        <div><h2 className="mb-3 font-semibold">Sides, flavours & favourites</h2>{choice("food_preferences", flavourFoods)}</div>
+        <div><h2 className="mb-3 font-semibold">Taste profile</h2>{choice("food_preferences", ["Spicy", "Mild", "Sweet", "Savory", "Tangy", "Low oil"])}</div>
       </div>}
+
 
       {step === 3 && <div className="space-y-7">
         <div><h2 className="mb-3 font-semibold">Allergies</h2>{choice("allergies", allergiesList)}</div>
