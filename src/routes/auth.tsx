@@ -19,6 +19,7 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // If already signed in, get out of here. _authenticated routes will route to onboarding/dashboard.
   useEffect(() => {
@@ -28,6 +29,7 @@ function AuthPage() {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (busy) return;
+    setFormError(null);
     setBusy(true);
     try {
       if (mode === "forgot") {
@@ -41,6 +43,7 @@ function AuthPage() {
         if (error) {
           const msg = error.message.toLowerCase();
           if (msg.includes("already") || msg.includes("registered")) {
+            setFormError("This email is already registered. Try signing in instead.");
             toast.error("This email is already registered. Try signing in instead.");
             setMode("login");
             return;
@@ -60,7 +63,9 @@ function AuthPage() {
       }
       navigate({ to: "/dashboard", replace: true });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong — please try again");
+      const message = error instanceof Error ? error.message : "Something went wrong — please try again";
+      setFormError(message);
+      toast.error(message);
     } finally {
       setBusy(false);
     }
@@ -92,8 +97,8 @@ function AuthPage() {
       <p className="mt-3 text-muted-foreground">{mode === "forgot" ? "We’ll email you a secure reset link." : "Continue your personalized nutrition journey."}</p>
       {mode !== "forgot" && <Button type="button" variant="outline" size="lg" className="mt-8 w-full rounded-xl" onClick={signInGoogle}>Continue with Google</Button>}
       <div className="my-6 flex items-center gap-4 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border"/>or use email<span className="h-px flex-1 bg-border"/></div>
-      <form onSubmit={submit} className="space-y-4"><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="h-12 rounded-xl bg-card" />{mode !== "forgot" && <Input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" className="h-12 rounded-xl bg-card" />}<Button variant="premium" size="lg" className="h-12 w-full rounded-xl" disabled={busy}>{busy ? "Please wait…" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send reset link" : "Sign in"}</Button></form>
-      <div className="mt-6 flex justify-between text-sm"><button className="text-primary hover:underline" onClick={() => setMode(mode === "signup" ? "login" : "signup")}>{mode === "signup" ? "Already have an account?" : "Create an account"}</button><button className="text-muted-foreground hover:text-primary" onClick={() => setMode(mode === "forgot" ? "login" : "forgot")}>{mode === "forgot" ? "Back to sign in" : "Forgot password?"}</button></div>
+      <form onSubmit={submit} className="space-y-4"><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="h-12 rounded-xl bg-card" />{mode !== "forgot" && <Input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" className="h-12 rounded-xl bg-card" />}<Button type="submit" variant="premium" size="lg" className="h-12 w-full rounded-xl" disabled={busy}>{busy ? "Please wait…" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send reset link" : "Sign in"}</Button>{formError && <p role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{formError}</p>}</form>
+      <div className="mt-6 flex justify-between text-sm"><button type="button" className="text-primary hover:underline" onClick={() => setMode(mode === "signup" ? "login" : "signup")}>{mode === "signup" ? "Already have an account?" : "Create an account"}</button><button type="button" className="text-muted-foreground hover:text-primary" onClick={() => setMode(mode === "forgot" ? "login" : "forgot")}>{mode === "forgot" ? "Back to sign in" : "Forgot password?"}</button></div>
     </div></section>
   </main>;
 }
