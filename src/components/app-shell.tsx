@@ -2,6 +2,7 @@ import nutriaiMark from "@/assets/nutriai-mark.png";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { BarChart3, BookOpen, ChefHat, CircleUserRound, Home, UtensilsCrossed } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -14,8 +15,14 @@ const NAV = [
 
 export function AppShell({ userEmail, children }: { userEmail: string; children: ReactNode }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const path = useRouterState({ select: (s) => s.location.pathname });
-  async function signOut() { await supabase.auth.signOut(); navigate({ to: "/auth", replace: true }); }
+  async function signOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  }
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[248px_1fr]">
       <aside className="hidden border-r border-primary/10 bg-primary px-5 py-7 text-primary-foreground lg:flex lg:flex-col">

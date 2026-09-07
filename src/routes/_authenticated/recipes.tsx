@@ -10,7 +10,7 @@ import {
 } from "@/lib/recipe-options.functions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { BookmarkPlus, Check, Clock, Flame, Plus, Sparkles, Trash2, Utensils, Youtube } from "lucide-react";
+import { BookmarkPlus, Check, Clock, Flame, Play, Plus, Sparkles, Trash2, Utensils } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -377,7 +377,7 @@ function RecipesPage() {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    <Youtube className="size-4" />Watch Similar Recipe
+                    <Play className="size-4" />Watch Similar Recipe
                   </a>
                 </div>
               </div>

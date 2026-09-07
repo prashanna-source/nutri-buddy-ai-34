@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureUserProfile } from "@/lib/auth-client";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Sign in — NutriAI" }, { name: "description", content: "Sign in to your personalized NutriAI nutrition dashboard." }] }),
+  head: () => ({ meta: [{ title: "Sign in — Food Veda" }, { name: "description", content: "Sign in to your personalized Food Veda nutrition dashboard." }, { property: "og:title", content: "Sign in — Food Veda" }, { property: "og:description", content: "Sign in to your personalized Food Veda nutrition dashboard." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: AuthPage,
 });
 
@@ -32,14 +33,17 @@ function AuthPage() {
     setFormError(null);
     setBusy(true);
     try {
+      const normalizedEmail = email.trim().toLowerCase();
+      if (!normalizedEmail) throw new Error("Enter your email address");
+      if (mode !== "forgot" && !password) throw new Error("Enter your password");
       if (mode === "forgot") {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
+        const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, { redirectTo: `${window.location.origin}/reset-password` });
         if (error) throw error;
         toast.success("Password reset link sent — check your inbox");
         return;
       }
       if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
+        const { data, error } = await supabase.auth.signUp({ email: normalizedEmail, password, options: { emailRedirectTo: `${window.location.origin}/auth/callback` } });
         if (error) {
           const msg = error.message.toLowerCase();
           if (msg.includes("already") || msg.includes("registered")) {
@@ -50,17 +54,21 @@ function AuthPage() {
           }
           throw error;
         }
+        if (!data.user) throw new Error("Your account could not be created. Please try again.");
         if (!data.session) { toast.success("Check your email to confirm your account"); return; }
-        toast.success("Welcome to NutriAI");
+        await ensureUserProfile(data.user);
+        toast.success("Welcome to Food Veda");
         navigate({ to: "/dashboard", replace: true });
         return;
       }
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
       if (error) {
         const msg = error.message.toLowerCase();
         if (msg.includes("invalid")) throw new Error("Incorrect email or password");
         throw error;
       }
+      if (!data.user) throw new Error("Sign-in did not complete. Please try again.");
+      await ensureUserProfile(data.user);
       navigate({ to: "/dashboard", replace: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Something went wrong — please try again";
@@ -74,10 +82,20 @@ function AuthPage() {
   async function signInGoogle() {
     if (busy) return;
     setBusy(true);
+    setFormError(null);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin, extraParams: { prompt: "select_account" } });
-      if (result.error) { toast.error(result.error.message); return; }
-      if (!result.redirected) navigate({ to: "/dashboard", replace: true });
+      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/auth/callback`, extraParams: { prompt: "select_account" } });
+      if (result.error) throw result.error;
+      if (!result.redirected) {
+        const { data, error } = await supabase.auth.getUser();
+        if (error || !data.user) throw error ?? new Error("Google sign-in did not complete");
+        await ensureUserProfile(data.user);
+        navigate({ to: "/dashboard", replace: true });
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Google sign-in failed. Please try again.";
+      setFormError(message);
+      toast.error(message);
     } finally {
       setBusy(false);
     }
