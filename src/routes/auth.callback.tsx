@@ -33,7 +33,7 @@ function AuthCallback() {
       // The session can land a moment after this page loads — wait up to 10s for it.
       let user = (await supabase.auth.getSession()).data.session?.user;
       if (!user) {
-        user = await new Promise<typeof user>((resolve) => {
+        user = await new Promise<import("@supabase/supabase-js").User | undefined>((resolve) => {
           const t = setTimeout(() => { sub.data.subscription.unsubscribe(); resolve(undefined); }, 10000);
           const sub = supabase.auth.onAuthStateChange((_e, session) => {
             if (session?.user) { clearTimeout(t); sub.data.subscription.unsubscribe(); resolve(session.user); }
