@@ -30,9 +30,16 @@ function AuthCallback() {
       const oauthError = params.get("error_description") ?? params.get("error");
       if (oauthError) throw new Error(oauthError);
 
-      const { data, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) throw sessionError;
-      let user = data.session?.user;
+      // The session can land a moment after this page loads — wait up to 10s for it.
+      let user = (await supabase.auth.getSession()).data.session?.user;
+      if (!user) {
+        user = await new Promise<typeof user>((resolve) => {
+          const t = setTimeout(() => { sub.data.subscription.unsubscribe(); resolve(undefined); }, 10000);
+          const sub = supabase.auth.onAuthStateChange((_e, session) => {
+            if (session?.user) { clearTimeout(t); sub.data.subscription.unsubscribe(); resolve(session.user); }
+          });
+        });
+      }
       if (!user) {
         const verified = await supabase.auth.getUser();
         if (verified.error) throw verified.error;
