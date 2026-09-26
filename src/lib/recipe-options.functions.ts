@@ -142,13 +142,53 @@ Respond with ONLY a JSON array of ${count} object(s), no markdown fences, no com
  "instructions": string[]
 }]`;
 
-    const result = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
-      prompt,
-      temperature: 1,
-    });
+    // Pre-assign a distinct "slot" (region + method + base ingredient) per recipe so the
+    // model can't collapse into near-identical dishes.
+    const shuffle = <T,>(a: T[]) => [...a].sort(() => Math.random() - 0.5);
+    const regions = shuffle(["North Indian (Punjabi)", "South Indian (Tamil/Kerala)", "Karnataka/Andhra", "Bengali/Odia", "Gujarati", "Maharashtrian", "Rajasthani", "Newari", "Thakali", "Himalayan Tibetan-Nepali", "Madhesi/Terai", "Kashmiri", "Goan/Konkani", "Continental-light"]);
+    const methods = shuffle(["steamed", "fermented", "pressure-cooked", "tawa/griddle", "stir-fried", "slow-simmered curry", "baked/roasted", "no-cook salad/sadeko", "soup/jhol", "grilled/tandoor-style"]);
+    const bases = shuffle(["moong dal", "chana/chickpea", "rajma/kidney beans", "paneer", "egg or tofu", "millet (kodo/ragi/bajra)", "rice", "whole wheat/atta", "besan", "leafy greens (palak/saag/gundruk)", "sprouts", "soya chunks", "potato/sweet potato", "cauliflower/cabbage", "chiura/poha", "curd/yogurt", "mushroom", "lentil (masoor/urad)"]);
+    const slots = Array.from({ length: count }, (_, i) => `${i + 1}. ${regions[i % regions.length]} · ${methods[i % methods.length]} · built around ${bases[i % bases.length]}`).join("\n");
+    const finalPrompt = `${prompt}
 
-    const parsed = extractJson(result.text ?? "");
+ASSIGNED SLOTS — recipe N must match slot N (swap the base ingredient only if it violates the user's diet/allergies, choosing a different unused one):
+${slots}`;
+
+    let text = "";
+    const geminiKey = process.env.GEMINI_API_KEY;
+    if (geminiKey) {
+      try {
+        const res = await fetch(
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
+            body: JSON.stringify({
+              contents: [{ role: "user", parts: [{ text: finalPrompt }] }],
+              generationConfig: { temperature: 1.1, topP: 0.95, responseMimeType: "application/json" },
+            }),
+          },
+        );
+        if (res.ok) {
+          const j: any = await res.json();
+          text = j?.candidates?.[0]?.content?.parts?.map((p: any) => p.text ?? "").join("") ?? "";
+        } else {
+          console.error("Gemini API error", res.status, (await res.text()).slice(0, 300));
+        }
+      } catch (e) {
+        console.error("Gemini API request failed", e);
+      }
+    }
+    if (!text) {
+      const result = await generateText({
+        model: gateway("google/gemini-3-flash-preview"),
+        prompt: finalPrompt,
+        temperature: 1,
+      });
+      text = result.text ?? "";
+    }
+
+    const parsed = extractJson(text);
     const arr = Array.isArray(parsed) ? parsed : [parsed];
     const recipes = arr
       .map((r) => recipeSchema.safeParse(r))
