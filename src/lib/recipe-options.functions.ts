@@ -199,8 +199,10 @@ ${slots}`;
     const seen = new Set<string>();
     const unique = recipes.filter((r) => {
       const k = r.dishName.trim().toLowerCase();
-      if (seen.has(k)) return false;
+      const m = "ing:" + r.mainIngredient.trim().toLowerCase();
+      if (seen.has(k) || (r.mainIngredient && seen.has(m))) return false;
       seen.add(k);
+      if (r.mainIngredient) seen.add(m);
       return true;
     });
     if (unique.length === 0) throw new Error("Could not generate recipes, please try again");
