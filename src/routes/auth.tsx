@@ -19,6 +19,7 @@ function AuthPage() {
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -43,6 +44,9 @@ function AuthPage() {
         return;
       }
       if (mode === "signup") {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(normalizedEmail)) throw new Error("Enter a valid email address");
+        if (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/\d/.test(password)) throw new Error("Password needs 8+ characters with an uppercase letter, a lowercase letter and a number");
+        if (password !== confirm) throw new Error("Passwords do not match");
         const { data, error } = await supabase.auth.signUp({ email: normalizedEmail, password, options: { emailRedirectTo: `${window.location.origin}/auth/callback` } });
         if (error) {
           const msg = error.message.toLowerCase();
@@ -115,7 +119,7 @@ function AuthPage() {
       <p className="mt-3 text-muted-foreground">{mode === "forgot" ? "We’ll email you a secure reset link." : "Continue your personalized nutrition journey."}</p>
       {mode !== "forgot" && <Button type="button" variant="outline" size="lg" className="mt-8 w-full rounded-xl" onClick={signInGoogle}>Continue with Google</Button>}
       <div className="my-6 flex items-center gap-4 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border"/>or use email<span className="h-px flex-1 bg-border"/></div>
-      <form onSubmit={submit} className="space-y-4"><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="h-12 rounded-xl bg-card" />{mode !== "forgot" && <Input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" className="h-12 rounded-xl bg-card" />}<Button type="submit" variant="premium" size="lg" className="h-12 w-full rounded-xl" disabled={busy}>{busy ? "Please wait…" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send reset link" : "Sign in"}</Button>{formError && <p role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{formError}</p>}</form>
+      <form onSubmit={submit} className="space-y-4"><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="h-12 rounded-xl bg-card" />{mode !== "forgot" && <Input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" className="h-12 rounded-xl bg-card" />}{mode === "signup" && <Input type="password" required value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Confirm password" aria-label="Confirm password" className="h-12 rounded-xl bg-card" />}<Button type="submit" variant="premium" size="lg" className="h-12 w-full rounded-xl" disabled={busy}>{busy ? "Please wait…" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send reset link" : "Sign in"}</Button>{formError && <p role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{formError}</p>}</form>
       <div className="mt-6 flex justify-between text-sm"><button type="button" className="text-primary hover:underline" onClick={() => setMode(mode === "signup" ? "login" : "signup")}>{mode === "signup" ? "Already have an account?" : "Create an account"}</button><button type="button" className="text-muted-foreground hover:text-primary" onClick={() => setMode(mode === "forgot" ? "login" : "forgot")}>{mode === "forgot" ? "Back to sign in" : "Forgot password?"}</button></div>
     </div></section>
   </main>;
