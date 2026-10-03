@@ -18,8 +18,12 @@ export const Route = createFileRoute("/api/chat")({
         const userId = claims?.claims?.sub;
         if (authError || !userId) return new Response("Unauthorized", { status: 401 });
 
-        const body = await request.json() as { messages?: UIMessage[] };
-        if (!Array.isArray(body.messages)) return new Response("Messages are required", { status: 400 });
+        const raw = await request.text();
+        if (raw.length > 200_000) return new Response("Request too large", { status: 413 });
+        let body: { messages?: UIMessage[] };
+        try { body = JSON.parse(raw); } catch { return new Response("Invalid JSON", { status: 400 }); }
+        if (!Array.isArray(body.messages) || body.messages.length === 0) return new Response("Messages are required", { status: 400 });
+        if (body.messages.length > 60) body.messages = body.messages.slice(-60);
         const { data: profile } = await client.from("profiles").select("health_goals,dietary_type,allergies,health_conditions,deficiencies,country,city").eq("id", userId).maybeSingle();
         const { createNutriAiProvider } = await import("@/lib/ai-gateway.server");
         const gateway = createNutriAiProvider(aiKey);
