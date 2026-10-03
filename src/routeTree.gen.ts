@@ -15,7 +15,6 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
-import { Route as ApiGenerateImageRouteImport } from './routes/api/generate-image'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedRecipesRouteImport } from './routes/_authenticated/recipes'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
@@ -51,11 +50,6 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
   getParentRoute: () => AuthRoute,
-} as any)
-const ApiGenerateImageRoute = ApiGenerateImageRouteImport.update({
-  id: '/api/generate-image',
-  path: '/api/generate-image',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
@@ -99,7 +93,6 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/recipes': typeof AuthenticatedRecipesRoute
   '/api/chat': typeof ApiChatRoute
-  '/api/generate-image': typeof ApiGenerateImageRoute
   '/auth/callback': typeof AuthCallbackRoute
 }
 export interface FileRoutesByTo {
@@ -113,7 +106,6 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/recipes': typeof AuthenticatedRecipesRoute
   '/api/chat': typeof ApiChatRoute
-  '/api/generate-image': typeof ApiGenerateImageRoute
   '/auth/callback': typeof AuthCallbackRoute
 }
 export interface FileRoutesById {
@@ -129,7 +121,6 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/recipes': typeof AuthenticatedRecipesRoute
   '/api/chat': typeof ApiChatRoute
-  '/api/generate-image': typeof ApiGenerateImageRoute
   '/auth/callback': typeof AuthCallbackRoute
 }
 export interface FileRouteTypes {
@@ -145,7 +136,6 @@ export interface FileRouteTypes {
     | '/profile'
     | '/recipes'
     | '/api/chat'
-    | '/api/generate-image'
     | '/auth/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -159,7 +149,6 @@ export interface FileRouteTypes {
     | '/profile'
     | '/recipes'
     | '/api/chat'
-    | '/api/generate-image'
     | '/auth/callback'
   id:
     | '__root__'
@@ -174,7 +163,6 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/_authenticated/recipes'
     | '/api/chat'
-    | '/api/generate-image'
     | '/auth/callback'
   fileRoutesById: FileRoutesById
 }
@@ -185,7 +173,6 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiChatRoute: typeof ApiChatRoute
-  ApiGenerateImageRoute: typeof ApiGenerateImageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -231,13 +218,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/callback'
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof AuthRoute
-    }
-    '/api/generate-image': {
-      id: '/api/generate-image'
-      path: '/api/generate-image'
-      fullPath: '/api/generate-image'
-      preLoaderRoute: typeof ApiGenerateImageRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
       id: '/api/chat'
@@ -320,7 +300,6 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiChatRoute: ApiChatRoute,
-  ApiGenerateImageRoute: ApiGenerateImageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
