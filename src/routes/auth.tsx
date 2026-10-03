@@ -59,7 +59,18 @@ function AuthPage() {
           throw error;
         }
         if (!data.user) throw new Error("Your account could not be created. Please try again.");
-        if (!data.session) { toast.success("Check your email to confirm your account"); return; }
+        if (data.user.identities && data.user.identities.length === 0) {
+          setFormError("This email is already registered. Try signing in instead.");
+          setMode("login");
+          return;
+        }
+        if (!data.session) {
+          setFormError(`We sent a confirmation link to ${normalizedEmail}. Open it to activate your account, then sign in.`);
+          toast.success("Check your email to confirm your account");
+          setMode("login");
+          setPassword(""); setConfirm("");
+          return;
+        }
         await ensureUserProfile(data.user);
         toast.success("Welcome to Food Veda");
         navigate({ to: "/dashboard", replace: true });
@@ -68,6 +79,7 @@ function AuthPage() {
       const { data, error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
       if (error) {
         const msg = error.message.toLowerCase();
+        if (msg.includes("not confirmed")) throw new Error("Please confirm your email first — check your inbox for the activation link.");
         if (msg.includes("invalid")) throw new Error("Incorrect email or password");
         throw error;
       }
