@@ -5,7 +5,7 @@ import { ACTIVITY_MULTIPLIER, calculateBMI, calculateTargets, cmToFeetInches, fe
 import { loadProfile, saveProfile } from "@/lib/profile.functions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/profile")({ component: ProfilePage });
@@ -23,6 +23,14 @@ const allergiesList = ["Dairy", "Peanuts", "Tree Nuts", "Soy", "Wheat / Gluten",
 const conditions = ["Diabetes", "High Blood Pressure", "Thyroid", "Cholesterol", "PCOS", "Gastric Issues", "IBS", "Fatty Liver", "Uric Acid / Gout", "Kidney Concerns"];
 const deficiencies = ["Iron Deficiency", "Vitamin D Deficiency", "Vitamin B12 Deficiency", "Calcium Deficiency", "Protein Deficiency", "Zinc Deficiency", "Folate Deficiency"];
 
+
+// Visible caption above every input/select so a filled field is still identifiable.
+function Field({ label, small, children }: { label: string; small?: boolean; children: ReactNode }) {
+  return <label className="flex flex-col space-y-1.5">
+    <span className={`block font-bold uppercase tracking-wider text-foreground ${small ? "text-[11px]" : "text-xs"}`}>{label}</span>
+    <div className="mt-auto">{children}</div>
+  </label>;
+}
 
 function chip(active: boolean, label: string, onClick: () => void) {
   return <button type="button" key={label} onClick={onClick} className={`rounded-full border px-3 py-1.5 text-xs ${active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"}`}>{label}</button>;
@@ -85,24 +93,24 @@ function ProfilePage() {
         <section className="premium-card space-y-4 rounded-2xl p-6">
           <h2 className="font-serif text-xl">Basics</h2>
           <div className="grid gap-3 md:grid-cols-2">
-            <Input value={form.full_name ?? ""} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="Full name" />
-            <Input type="number" value={form.age ?? ""} onChange={(e) => setForm({ ...form, age: e.target.value })} placeholder="Age" />
-            <div className="space-y-1.5">
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Height</span>
-              <div className="flex gap-2">
-                <Input type="number" value={form.feet ?? ""} onChange={(e) => setForm({ ...form, feet: e.target.value })} placeholder="Feet" />
-                <Input type="number" value={form.inches ?? ""} onChange={(e) => setForm({ ...form, inches: e.target.value })} placeholder="Inches" />
+            <Field label="Name"><Input className="h-10" value={form.full_name ?? ""} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="Full name" /></Field>
+            <Field label="Age"><Input className="h-10" type="number" value={form.age ?? ""} onChange={(e) => setForm({ ...form, age: e.target.value })} placeholder="Age" /></Field>
+            <Field label="Gender"><select className="h-10 w-full rounded-md border border-input bg-card px-3" value={form.gender ?? ""} onChange={(e) => setForm({ ...form, gender: e.target.value })}><option value="">Select gender</option><option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option></select></Field>
+            <div className="flex flex-col space-y-1.5">
+              <span className="block text-xs font-bold uppercase tracking-wider text-foreground">Height</span>
+              <div className="mt-auto flex gap-2">
+                <Field label="Feet" small><Input className="h-10" type="number" value={form.feet ?? ""} onChange={(e) => setForm({ ...form, feet: e.target.value })} placeholder="Feet" /></Field>
+                <Field label="Inches" small><Input className="h-10" type="number" value={form.inches ?? ""} onChange={(e) => setForm({ ...form, inches: e.target.value })} placeholder="Inches" /></Field>
               </div>
             </div>
-            <Input type="number" value={form.weight_kg ?? ""} onChange={(e) => setForm({ ...form, weight_kg: e.target.value })} placeholder="Weight (kg)" />
-            <select className="h-10 rounded-md border border-input bg-card px-3" value={form.gender ?? ""} onChange={(e) => setForm({ ...form, gender: e.target.value })}><option value="">Gender</option><option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option></select>
-            <Input value={form.city ?? ""} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="City" />
-            <select className="h-10 rounded-md border border-input bg-card px-3" value={form.activity_level ?? "Moderately Active"} onChange={(e) => setForm({ ...form, activity_level: e.target.value })}>{["Sedentary", "Lightly Active", "Moderately Active", "Very Active"].map(x => <option key={x}>{x}</option>)}</select>
-            <select className="h-10 rounded-md border border-input bg-card px-3" value={form.dietary_type ?? "Vegetarian"} onChange={(e) => setForm({ ...form, dietary_type: e.target.value })}>{["Vegetarian", "Vegan", "Eggetarian", "Non-Vegetarian", "Jain", "Pescatarian"].map(x => <option key={x}>{x}</option>)}</select>
+            <Field label="Weight (kg)"><Input className="h-10" type="number" value={form.weight_kg ?? ""} onChange={(e) => setForm({ ...form, weight_kg: e.target.value })} placeholder="Weight in kilograms" /></Field>
+            <Field label="Activity Level"><select className="h-10 w-full rounded-md border border-input bg-card px-3" value={form.activity_level ?? "Moderately Active"} onChange={(e) => setForm({ ...form, activity_level: e.target.value })}>{["Sedentary", "Lightly Active", "Moderately Active", "Very Active"].map(x => <option key={x}>{x}</option>)}</select></Field>
+            <Field label="City"><Input className="h-10" value={form.city ?? ""} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="Your city" /></Field>
+            <Field label="Diet Type"><select className="h-10 w-full rounded-md border border-input bg-card px-3" value={form.dietary_type ?? "Vegetarian"} onChange={(e) => setForm({ ...form, dietary_type: e.target.value })}>{["Vegetarian", "Vegan", "Eggetarian", "Non-Vegetarian", "Jain", "Pescatarian"].map(x => <option key={x}>{x}</option>)}</select></Field>
           </div>
         </section>
         <section className="premium-card space-y-3 rounded-2xl p-6"><h2 className="font-serif text-xl">Health goals</h2><div className="flex flex-wrap gap-2">{goalsList.map(g => chip((form.health_goals ?? []).includes(g), g, () => toggle("health_goals", g)))}</div></section>
-        <section className="premium-card space-y-3 rounded-2xl p-6"><h2 className="font-serif text-xl">Cuisines</h2><div className="flex flex-wrap gap-2">{cuisines.map(g => chip((form.cuisine_preferences ?? []).includes(g), g, () => toggle("cuisine_preferences", g)))}</div></section>
+        <section className="premium-card space-y-3 rounded-2xl p-6"><h2 className="font-serif text-xl">Cuisine Preferences</h2><div className="flex flex-wrap gap-2">{cuisines.map(g => chip((form.cuisine_preferences ?? []).includes(g), g, () => toggle("cuisine_preferences", g)))}</div></section>
         <section className="premium-card space-y-4 rounded-2xl p-6">
           <div><h2 className="font-serif text-xl">Foods you actually eat</h2><p className="text-sm text-muted-foreground">Recipes are built around these Indian and Nepali staples.</p></div>
           {foodGroups.map(group => (
