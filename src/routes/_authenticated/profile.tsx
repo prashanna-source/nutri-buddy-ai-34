@@ -26,9 +26,9 @@ const deficiencies = ["Iron Deficiency", "Vitamin D Deficiency", "Vitamin B12 De
 
 // Visible caption above every input/select so a filled field is still identifiable.
 function Field({ label, small, children }: { label: string; small?: boolean; children: ReactNode }) {
-  return <label className="block space-y-1.5">
+  return <label className="flex flex-col space-y-1.5">
     <span className={`block font-bold uppercase tracking-wider text-foreground ${small ? "text-[11px]" : "text-xs"}`}>{label}</span>
-    {children}
+    <div className="mt-auto">{children}</div>
   </label>;
 }
 
@@ -96,9 +96,9 @@ function ProfilePage() {
             <Field label="Name"><Input value={form.full_name ?? ""} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="Full name" /></Field>
             <Field label="Age"><Input type="number" value={form.age ?? ""} onChange={(e) => setForm({ ...form, age: e.target.value })} placeholder="Age" /></Field>
             <Field label="Gender"><select className="h-10 w-full rounded-md border border-input bg-card px-3" value={form.gender ?? ""} onChange={(e) => setForm({ ...form, gender: e.target.value })}><option value="">Select gender</option><option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option></select></Field>
-            <div className="space-y-1.5">
+            <div className="flex flex-col space-y-1.5">
               <span className="block text-xs font-bold uppercase tracking-wider text-foreground">Height</span>
-              <div className="flex gap-2">
+              <div className="mt-auto flex gap-2">
                 <Field label="Feet" small><Input type="number" value={form.feet ?? ""} onChange={(e) => setForm({ ...form, feet: e.target.value })} placeholder="Feet" /></Field>
                 <Field label="Inches" small><Input type="number" value={form.inches ?? ""} onChange={(e) => setForm({ ...form, inches: e.target.value })} placeholder="Inches" /></Field>
               </div>
