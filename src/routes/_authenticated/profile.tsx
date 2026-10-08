@@ -93,19 +93,19 @@ function ProfilePage() {
         <section className="premium-card space-y-4 rounded-2xl p-6">
           <h2 className="font-serif text-xl">Basics</h2>
           <div className="grid gap-3 md:grid-cols-2">
-            <Field label="Name"><Input value={form.full_name ?? ""} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="Full name" /></Field>
-            <Field label="Age"><Input type="number" value={form.age ?? ""} onChange={(e) => setForm({ ...form, age: e.target.value })} placeholder="Age" /></Field>
+            <Field label="Name"><Input className="h-10" value={form.full_name ?? ""} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="Full name" /></Field>
+            <Field label="Age"><Input className="h-10" type="number" value={form.age ?? ""} onChange={(e) => setForm({ ...form, age: e.target.value })} placeholder="Age" /></Field>
             <Field label="Gender"><select className="h-10 w-full rounded-md border border-input bg-card px-3" value={form.gender ?? ""} onChange={(e) => setForm({ ...form, gender: e.target.value })}><option value="">Select gender</option><option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option></select></Field>
             <div className="flex flex-col space-y-1.5">
               <span className="block text-xs font-bold uppercase tracking-wider text-foreground">Height</span>
               <div className="mt-auto flex gap-2">
-                <Field label="Feet" small><Input type="number" value={form.feet ?? ""} onChange={(e) => setForm({ ...form, feet: e.target.value })} placeholder="Feet" /></Field>
-                <Field label="Inches" small><Input type="number" value={form.inches ?? ""} onChange={(e) => setForm({ ...form, inches: e.target.value })} placeholder="Inches" /></Field>
+                <Field label="Feet" small><Input className="h-10" type="number" value={form.feet ?? ""} onChange={(e) => setForm({ ...form, feet: e.target.value })} placeholder="Feet" /></Field>
+                <Field label="Inches" small><Input className="h-10" type="number" value={form.inches ?? ""} onChange={(e) => setForm({ ...form, inches: e.target.value })} placeholder="Inches" /></Field>
               </div>
             </div>
-            <Field label="Weight (kg)"><Input type="number" value={form.weight_kg ?? ""} onChange={(e) => setForm({ ...form, weight_kg: e.target.value })} placeholder="Weight in kilograms" /></Field>
+            <Field label="Weight (kg)"><Input className="h-10" type="number" value={form.weight_kg ?? ""} onChange={(e) => setForm({ ...form, weight_kg: e.target.value })} placeholder="Weight in kilograms" /></Field>
             <Field label="Activity Level"><select className="h-10 w-full rounded-md border border-input bg-card px-3" value={form.activity_level ?? "Moderately Active"} onChange={(e) => setForm({ ...form, activity_level: e.target.value })}>{["Sedentary", "Lightly Active", "Moderately Active", "Very Active"].map(x => <option key={x}>{x}</option>)}</select></Field>
-            <Field label="City"><Input value={form.city ?? ""} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="Your city" /></Field>
+            <Field label="City"><Input className="h-10" value={form.city ?? ""} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="Your city" /></Field>
             <Field label="Diet Type"><select className="h-10 w-full rounded-md border border-input bg-card px-3" value={form.dietary_type ?? "Vegetarian"} onChange={(e) => setForm({ ...form, dietary_type: e.target.value })}>{["Vegetarian", "Vegan", "Eggetarian", "Non-Vegetarian", "Jain", "Pescatarian"].map(x => <option key={x}>{x}</option>)}</select></Field>
           </div>
         </section>
